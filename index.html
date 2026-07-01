@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Caso técnico: cómo se mejoró la persistencia y validación del carrito en un e-commerce de alfajores."
+    />
+    <title>Blog técnico | Mundial de Alfajores</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <header class="hero">
+      <nav class="nav" aria-label="Navegación principal">
+        <a class="brand" href="#inicio">CM<span>·</span>DEV</a>
+        <a class="repo-link" href="#control-versiones">Ver evidencia de versiones <span aria-hidden="true">↗</span></a>
+      </nav>
+
+      <div class="hero-content" id="inicio">
+        <p class="eyebrow">ENTREGA FINAL · BLOG TÉCNICO</p>
+        <h1>Cómo mejoré el carrito de compras de un e-commerce sin perder el foco en la experiencia de compra</h1>
+        <p class="lead">
+          Un caso práctico sobre catálogo dinámico, persistencia de datos, validación de stock y aprendizaje a partir de un incidente técnico.
+        </p>
+        <div class="meta" aria-label="Datos de la entrada">
+          <span>Proyecto: Mundial de Alfajores</span>
+          <span aria-hidden="true">•</span>
+          <span>Lectura: 4 min</span>
+          <span aria-hidden="true">•</span>
+          <span>Actualizado: julio de 2026</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <aside class="summary" aria-label="Resumen ejecutivo">
+        <span class="summary-label">TL;DR</span>
+        <p>
+          Detecté que el carrito podía perder o recuperar mal información al recargar la página. Se ajustó la lectura de <code>localStorage</code>, se validó el stock antes de sumar productos y se documentó el incidente para prevenir que vuelva a ocurrir.
+        </p>
+      </aside>
+
+      <article>
+        <section id="contexto">
+          <p class="section-number">01 / CONTEXTO</p>
+          <h2>Un e-commerce con catálogo dinámico y carrito persistente</h2>
+          <p>
+            El proyecto consiste en una tienda online ficticia para el <strong>Mundial de Alfajores</strong>. La página muestra productos obtenidos desde una API, permite agregarlos a un carrito, ajustar cantidades, eliminar ítems y conservar la selección aunque la persona usuaria actualice la página.
+          </p>
+          <div class="facts">
+            <div><span class="fact-title">Catálogo</span><span>Datos obtenidos desde API</span></div>
+            <div><span class="fact-title">Carrito</span><span>Estado persistido en localStorage</span></div>
+            <div><span class="fact-title">Objetivo</span><span>Compra clara y sin cantidades inválidas</span></div>
+          </div>
+        </section>
+
+        <section id="problema">
+          <p class="section-number">02 / PROBLEMA</p>
+          <h2>El carrito no siempre recuperaba correctamente los productos</h2>
+          <p>
+            Durante las pruebas detecté que, después de actualizar la página, el carrito podía no recuperar los productos guardados o mostrar cantidades que superaban el stock disponible. Esto afectaba la continuidad de la compra y hacía que el comportamiento no fuera confiable para la persona usuaria.
+          </p>
+          <div class="callout callout-problem">
+            <span aria-hidden="true">⚠</span>
+            <div>
+              <strong>Impacto</strong>
+              <p>La sesión de compra podía quedar incompleta y el total podía no representar una cantidad válida de productos.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="investigacion">
+          <p class="section-number">03 / INVESTIGACIÓN Y ACCIONES</p>
+          <h2>Qué revisé y cómo lo resolví</h2>
+          <p>
+            Primero separé el problema en hipótesis simples y prioricé las que tenían mayor impacto sobre la compra. La revisión se centró en la carga inicial del carrito, la conversión de datos guardados y la lógica que incrementa cantidades.
+          </p>
+          <ol class="steps">
+            <li>
+              <span class="step-index">01</span>
+              <div><strong>Revisé los datos guardados.</strong><p>Verifiqué qué ocurría cuando <code>localStorage</code> no tenía datos, contenía una versión anterior del carrito o devolvía un valor con formato inválido.</p></div>
+            </li>
+            <li>
+              <span class="step-index">02</span>
+              <div><strong>Agregué una carga segura.</strong><p>Incorporé una validación con valor por defecto y manejo de errores para que el sitio pueda iniciar incluso si no hay datos almacenados.</p></div>
+            </li>
+            <li>
+              <span class="step-index">03</span>
+              <div><strong>Validé el stock antes de modificar el carrito.</strong><p>La cantidad solo aumenta si todavía existe stock disponible. Cuando no lo hay, la interfaz muestra un mensaje claro.</p></div>
+            </li>
+            <li>
+              <span class="step-index">04</span>
+              <div><strong>Probé el flujo completo.</strong><p>Realicé pruebas agregando, eliminando, modificando cantidades y recargando la página en pantalla de escritorio y móvil.</p></div>
+            </li>
+          </ol>
+
+          <div class="code-card" aria-label="Ejemplo simplificado de carga segura del carrito">
+            <div class="code-top"><span>storage.js</span><span>ejemplo simplificado</span></div>
+            <pre><code>function obtenerCarrito() {
+  try {
+    return JSON.parse(localStorage.getItem("carrito")) || [];
+  } catch (error) {
+    return [];
+  }
+}</code></pre>
+          </div>
+        </section>
+
+        <section id="postmortem">
+          <p class="section-number">04 / POST-MORTEM CONSTRUCTIVO</p>
+          <h2>Aprender del incidente, sin buscar culpables</h2>
+          <p>
+            En lugar de atribuir el problema a una persona, el análisis se enfocó en el proceso. La causa principal fue no contemplar todos los estados posibles de los datos guardados en el navegador y no validar el límite de stock desde el inicio del flujo.
+          </p>
+          <div class="postmortem-grid">
+            <div><span>Qué funcionó</span><p>Dividir la investigación en pasos pequeños permitió llegar rápido a una hipótesis verificable.</p></div>
+            <div><span>Qué faltaba</span><p>Casos de prueba para datos vacíos, dañados y cantidades mayores al stock.</p></div>
+            <div><span>Qué cambia</span><p>El checklist de pruebas incluye persistencia, stock y recarga antes de cerrar un ticket.</p></div>
+          </div>
+        </section>
+
+        <section id="control-versiones">
+          <p class="section-number">05 / CONTROL DE VERSIONES</p>
+          <h2>Cambios trazables y fáciles de revisar</h2>
+          <p>
+            Los cambios se organizaron por objetivo para facilitar la revisión. En un repositorio real, cada ajuste queda asociado a un commit descriptivo y, cuando corresponde, a un Pull Request con contexto, pruebas realizadas e impacto esperado.
+          </p>
+          <div class="version-list">
+            <a href="https://github.com/TU-USUARIO/TU-REPOSITORIO/commits/main" target="_blank" rel="noreferrer">
+              <span class="tag">COMMIT</span>
+              <span><strong>feat:</strong> persistir y recuperar el carrito de forma segura</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+            <a href="https://github.com/TU-USUARIO/TU-REPOSITORIO/commits/main" target="_blank" rel="noreferrer">
+              <span class="tag">COMMIT</span>
+              <span><strong>fix:</strong> validar stock al agregar productos al carrito</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+            <a href="https://github.com/TU-USUARIO/TU-REPOSITORIO" target="_blank" rel="noreferrer">
+              <span class="tag">REPO</span>
+              <span>Repositorio público del proyecto</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+          <p class="note"><strong>Nota de entrega:</strong> antes de publicar, reemplazar <code>TU-USUARIO/TU-REPOSITORIO</code> por el enlace real de GitHub.</p>
+        </section>
+
+        <section id="aprendizajes">
+          <p class="section-number">06 / APRENDIZAJES</p>
+          <h2>Mejoras que quedan para el próximo cambio</h2>
+          <ul class="check-list">
+            <li><span>✓</span> Validar datos guardados antes de usarlos en la interfaz.</li>
+            <li><span>✓</span> Definir límites de stock desde el flujo de alta al carrito.</li>
+            <li><span>✓</span> Documentar escenarios de prueba y resultados en cada ticket.</li>
+            <li><span>✓</span> Usar commits específicos para poder revisar y revertir cambios con seguridad.</li>
+          </ul>
+        </section>
+
+        <section id="feedback">
+          <p class="section-number">07 / FEEDBACK RADICALMENTE SINCERO</p>
+          <h2>La mejora técnica también necesita empatía</h2>
+          <p>
+            Durante la revisión, el feedback se centró en el comportamiento del código y en el impacto sobre la compra, no en la persona que lo desarrolló. En lugar de señalar “esto está mal”, el comentario propone qué escenario falta cubrir, por qué importa y una alternativa concreta. Esta forma de revisar permite ser directa sobre la calidad sin perder respeto ni motivación.
+          </p>
+          <blockquote>
+            “La lógica funciona bien en el flujo principal. Para evitar una compra inválida, ¿podemos validar el stock antes de incrementar la cantidad y sumar una prueba para ese caso?”
+          </blockquote>
+        </section>
+
+        <section class="closing">
+          <p>Una documentación breve, clara y honesta transforma un error puntual en una mejora reutilizable para todo el equipo.</p>
+        </section>
+      </article>
+    </main>
+
+    <footer>
+      <p>Blog técnico · Proyecto final de comunicación digital</p>
+      <a href="#inicio">Volver arriba ↑</a>
+    </footer>
+  </body>
+</html>
